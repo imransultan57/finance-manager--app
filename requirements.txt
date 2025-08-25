@@ -1,0 +1,27 @@
+# Django and Web Server
+Django>=4.2
+gunicorn
+
+# Database
+psycopg2-binary      # For PostgreSQL
+
+# AWS Integration
+boto3                # AWS SDK
+django-storages      # For S3 static/media storage
+
+# Environment variables
+python-dotenv
+
+# Static files handling
+whitenoise
+
+# Data processing & visualization
+numpy
+pandas
+plotly
+
+# Optional: date handling
+python-dateutil
+
+# HTTP requests (if needed)
+requests
