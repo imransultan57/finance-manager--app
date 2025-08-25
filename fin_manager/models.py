@@ -2,7 +2,7 @@ from django.db import models
 from django.db.models import Sum, Count, F, Q
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
-
+from django.utils import timezone
 
 class Account(models.Model):
     name = models.CharField(max_length=100)
@@ -18,7 +18,7 @@ class Account(models.Model):
 class Liability(models.Model):
     name = models.CharField(max_length=100)
     amount = models.FloatField(default=0)
-    date = models.DateField(null=False, default=datetime.now().date())
+    date = models.DateField(default=timezone.now, null=False)
     long_term = models.BooleanField(default=False)
     interest_rate = models.FloatField(default=0, blank=True, null=True)
     end_date = models.DateField(blank=True, null=True)
@@ -35,9 +35,15 @@ class Liability(models.Model):
     def calculate_monthly_expense(self):
         if self.long_term:
             if self.interest_rate == 0:
-                return self.amount / ((self.end_date - self.date) / 30)  # Assuming a month has 30 days
+                days = (self.end_date - self.date).days
+                if days <= 0:
+                    return 0  # avoid divide by zero or negative
+                months = days / 30  # approximate months
+                return self.amount / months
             else:
-                months = (self.end_date.year - datetime.now().year) * 12 + self.end_date.month - datetime.now().month
+                months = (self.end_date.year - datetime.now().year) * 12 + (self.end_date.month - datetime.now().month)
+                if months <= 0:
+                    return 0
                 monthly_rate = self.interest_rate / 12 / 100
                 monthly_expense = (self.amount * monthly_rate) / (1 - (1 + monthly_rate) ** -months)
                 return round(monthly_expense, 2)
